@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>Map of Thessaloniki</title>
+
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<!-- Link frameworks and utilities code -->
+	<script src="http://code.jquery.com/jquery-1.11.2.min.js"></script>
+	<link href="https://fonts.googleapis.com/css?family=BioRhyme" rel="stylesheet">
+	<link href="https://fonts.googleapis.com/css?family=Thasadith" rel="stylesheet">
+	<script type="text/javascript" src="http://knockoutjs.com/downloads/knockout-3.0.0.debug.js"></script>
+	<link rel="stylesheet" href="css/bootstrap.css"> 
+	<link rel="stylesheet" type="text/css" href="css/style.css">
+</head>
+<body>
+	<!-- Header -->
+	<header>
+		<span data-bind="html: title"></span>
+		<span data-bind="html: subtitle"></span>
+	</header>
+
+	<!-- Search bar -->
+	<input class="search-input" id="myInput" data-bind="value: query, valueUpdate: 'keyup'" autocomplete="off" type="search" placeholder="Search location...">
+
+	<!-- Highlight list -->
+	<div class="row">
+		<div class="col-md-3 highlight-list">
+			<ul class="list-entry" id="myUL" data-bind="foreach: attractions">
+				<li class="list-element" data-bind="visible: filtered, click: $parent.list"> 
+					<a data-bind="attr: {href: url, title: name}"><span data-bind="text: name"></span></a>
+					<span data-bind="text: address"></span><br>
+				</li>
+			</ul>
+			<div class="weather">
+				<p><span data-bind="html: weather1"></span></p>
+				<p><span data-bind="html: weather2"></span></p>
+			</div>
+		</div>
+
+		<!-- Get map -->
+		<div class="col-md-9" id="map-window">   
+			<div id="map"></div>
+		</div>
+	</div>		
+
+	<div class="reset">
+		<button type="submit" id="reset"><span data-bind="click: resetFunc">reset map</span></button>
+	</div>
+
+	<div class="about">
+		<p>About Thessaloniki:</p>
+		<p>Thessaloniki is a Greek port city on the Thermaic Gulf of the Aegean Sea. Evidence of Roman, Byzantine and Ottoman history remains, especially around Ano Poli, the upper town. The ruins of Roman Emperor Galerius’ 4th-century palace include the Rotunda that has been both a church and a mosque. Much of the city center was destroyed in the Great Fire of 1917. The rebuilt 20th-century city has a modern European layout.</p>
+		<p>Thessaloniki is located on the Thermaic Gulf, at the northwest corner of the Aegean Sea. It is bounded on the west by the delta of the Axios/Vardar. The municipality of Thessaloniki, the historical center, had a population of 325,182 in 2011, while the Thessaloniki Urban Area had a population of 788,952, and the Thessaloniki Metropolitan Area had 1,012,297 inhabitants in 2011</p>
+		<p>It is Greece's second major economic, industrial, commercial and political centre; it is a major transportation hub for Greece and southeastern Europe, notably through the Port of Thessaloniki. The city is renowned for its festivals, events and vibrant cultural life in general, and is considered to be Greece's cultural capital. Events such as the Thessaloniki International Fair and the Thessaloniki International Film Festival are held annually, while the city also hosts the largest bi-annual meeting of the Greek diaspora. Thessaloniki was the 2014 European Youth Capital.</p>
+		<p>Source: <a href="https://en.wikipedia.org/wiki/Thessaloniki">Thessaloniki Wiki</a></p>
+	</div>
+
+	<div class="author">
+		<p>created by Despoina Sakoglou</p>
+	</div>
+
+	<script type="text/javascript" src="js/script.js"></script>
+	<script type="text/javascript">function foo() { alert("Map not loaded properly. Please check your internet connection."); }</script>
+	<script async defer onerror="foo()" src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCfod5v_limhy-cOVMZ_0Bm1Ne4DOe0BhQ&libraries=places&callback=initMap"></script>
+</body>
+</html>
+
+<!--
+		<div class="forecast col-md-3">
+			<p><span data-bind="html: weather1"></span></p>
+			<p><span data-bind="html: weather2"></span></p>
+			<img src="img/w.png" style="width: 75px; height: 75px;" alt="weather icon">
+		</div>
+
+		-->
