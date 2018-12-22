@@ -69,7 +69,9 @@ $.getJSON(weatherapi, function(data) {
     iconurl = details.icon_url;
     icon = details.icon;
 }).error(function(e){
-    $(".forecast").append('<p style="text-align: center;">Failed to retrieve weather information!</p>');
+    console.log("Failed to get Weather Underground information. Please check your internet connection.");
+    alert("Failed to get Weather Underground information. Please check your internet connection.");
+    //$(".forecast").append('<p style="text-align: center;">Failed to retrieve weather information!</p>');
 }).success(function(){
     viewModel.weather1('Temperature: ' +temperature + '°C');
     viewModel.weather2('<img src="' + iconurl + '">  ' + icon);
@@ -112,7 +114,8 @@ function initMap() {
                                        '<p><b>URL: \
                                        </b><a href="'+ highlights[i].url + '">' + highlights[i].name + '</a>' + '</p>' + '</div>' 
                                        + '<img src="https://maps.googleapis.com/maps/api/streetview?size=100x100&location='+ highlights[i].latLng.lat + ','+  highlights[i].latLng.lng 
-                                       + '&heading=200&pitch=0&key=AIzaSyBGpbBD1bxQdNbNB3ckPFfK1s-prjJH0tM">' + '</div>');
+                                       + '&heading=200&pitch=0&key=AIzaSyBGpbBD1bxQdNbNB3ckPFfK1s-prjJH0tM">' + '</div>'
+                                       + '<a href="' + viewModel.attractions()[i].wikilinks + '">Wiki URL</a>');
                 infowindow.open(map, marker);                                
         }})(marker, i));     
     }
@@ -189,7 +192,8 @@ var viewModel = {
                                        "<p><b>Address: </b>" + place.address + "</p>" + '<p><b>URL: </b><a href="' 
                                        + place.url + '">' + place.name + '</a>' + '</p>' + '</div>' 
                                        + '<img src="https://maps.googleapis.com/maps/api/streetview?size=150x150&location='+ place.lat + ',' +  place.lng 
-                                       + '&heading=200&pitch=0&key=AIzaSyBGpbBD1bxQdNbNB3ckPFfK1s-prjJH0tM">' + '</div>');
+                                       + '&heading=200&pitch=0&key=AIzaSyBGpbBD1bxQdNbNB3ckPFfK1s-prjJH0tM">' + '</div>'
+                                       + '<a href="' + viewModel.attractions()[i].wikilinks + '">Wiki URL</a>');
         infowindow.open(map, place.marker);
     }
 };
@@ -219,12 +223,13 @@ viewModel.search = function(value){
 viewModel.query.subscribe(viewModel.search);
 viewModel.initWiki = function() {
     this.attractions().forEach(function(attraction){
-        $.ajax({
+        var req = $.ajax({
             url: 'http://en.wikipedia.org/w/api.php',
             data: { action: 'query', list: 'search', srsearch: attraction.name, format: 'json' },
-            dataType: 'jsonp'
+            dataType: 'jsonp',
         }).done(function(data){
             var name = attraction.name.replace(" ", "_");
+            attraction.wikilinks = 'https://en.wikipedia.org/w/api.php?action=opensearch&search=' + name + '&format=json&callback=wikiCallback'
         }).fail(function(){
             console.log("ajax request to Wiki API failed!");
             alert("ajax request to Wiki API failed!");
