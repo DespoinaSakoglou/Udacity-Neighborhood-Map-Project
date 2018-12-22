@@ -22,6 +22,7 @@
 	</header>
 
 	<!-- Search bar -->
+	<div id="pac-input"></div>
 	<input class="search-input" id="myInput" data-bind="value: query, valueUpdate: 'keyup'" autocomplete="off" type="search" placeholder="Search location...">
 
 	<!-- Highlight list -->
@@ -29,8 +30,8 @@
 		<div class="col-md-3 highlight-list">
 			<ul class="list-entry" id="myUL" data-bind="foreach: attractions">
 				<li class="list-element" data-bind="visible: filtered, click: $parent.list"> 
-					<a data-bind="attr: {href: url, title: name}"><span data-bind="text: name"></span></a>
-					<span data-bind="text: address"></span><br>
+					<a data-bind="attr: {href: wikilinks, title: name}"><span data-bind="text: name + '   (URL)'"></span></a>
+					<span data-bind="text: address"></span>
 				</li>
 			</ul>
 			<div class="weather">
