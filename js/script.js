@@ -4,6 +4,7 @@ var highlights = [
         "name": "Rotonda", 
         "address": "Egnatia 144, Thessaloniki 546 22, Greece", 
         "url": "https://inthessaloniki.com/item/rotonda-of-galerius/", 
+        "greekname" : "Rotonda (Ροτόντα)",
         "latLng": { 
             "lat": 40.6321,
             "lng": 22.9517,
@@ -13,24 +14,17 @@ var highlights = [
         "name": "White Tower", 
         "address": "Thessaloniki 546 21, Greece", 
         "url": "https://en.wikipedia.org/wiki/White_Tower_of_Thessaloniki", 
+        "greekname" : "White Tower (Λευκός Πύργος)",
         "latLng": { 
             "lat": 40.6264,
             "lng": 22.9484,
         }
     }, 
     {
-        "name": "Eftapurgio", 
-        "address": "Eftapurgio, Thessaloniki 546 34, Greece", 
-        "url": "https://en.wikipedia.org/wiki/Heptapyrgion_(Thessaloniki)", 
-        "latLng": { 
-            "lat": 40.6442,
-            "lng": 22.9619,
-        }
-    },
-    {
         "name": "Aristotelous (Aristotle) Square", 
         "address": "Thessaloniki 546 24, Greece", 
         "url": "https://en.wikipedia.org/wiki/Aristotelous_Square", 
+        "greekname" : "Aristotelous Square (Πλατεία Αριστοτέλους)",
         "latLng": { 
             "lat": 40.6323,
             "lng": 22.9408,
@@ -40,6 +34,7 @@ var highlights = [
         "name": "Ladadika", 
         "address": "Thessaloniki 546 25, Greece", 
         "url": "https://inthessaloniki.com/food/ladadika/", 
+        "greekname" : "Ladadika (Λαδάδικα)",
         "latLng": { 
             "lat": 40.6348,
             "lng": 22.9365,
@@ -49,6 +44,7 @@ var highlights = [
         "name": "Bit Bazaar", 
         "address": "Tositsa 7, Thessaloniki 546 31, Greece", 
         "url": "https://inthessaloniki.com/food/bit-bazaar/", 
+        "greekname" : "Bit Bazaar (Μπιτ Μπαζαρ)",
         "latLng": { 
             "lat": 40.6389,
             "lng": 22.9443,
@@ -115,7 +111,7 @@ function initMap() {
                                        </b><a href="'+ highlights[i].url + '">' + highlights[i].name + '</a>' + '</p>' + '</div>' 
                                        + '<img src="https://maps.googleapis.com/maps/api/streetview?size=100x100&location='+ highlights[i].latLng.lat + ','+  highlights[i].latLng.lng 
                                        + '&heading=200&pitch=0&key=AIzaSyBGpbBD1bxQdNbNB3ckPFfK1s-prjJH0tM">' + '</div>'
-                                       + '<a href="' + viewModel.attractions()[i].wikilinks + '">Wiki URL</a>');
+                                       + '<p>Greek name: ' + viewModel.attractions()[i].greekname + '</p>');
                 infowindow.open(map, marker);                                
         }})(marker, i));     
     }
@@ -170,7 +166,7 @@ var Attraction = function(data) {
     this.url = data.url;
     this.lat = data.latLng.lat;
     this.lng = data.latLng.lng;
-    this.wikilinks = data.wikilinks;
+    this.greekname = data.greekname;
     this.filtered = ko.observable(true);
 };
 var viewModel = {
@@ -193,7 +189,7 @@ var viewModel = {
                                        + place.url + '">' + place.name + '</a>' + '</p>' + '</div>' 
                                        + '<img src="https://maps.googleapis.com/maps/api/streetview?size=150x150&location='+ place.lat + ',' +  place.lng 
                                        + '&heading=200&pitch=0&key=AIzaSyBGpbBD1bxQdNbNB3ckPFfK1s-prjJH0tM">' + '</div>'
-                                       + '<a href="' + viewModel.attractions()[i].wikilinks + '">Wiki URL</a>');
+                                       + '<p>Greek name: ' + viewModel.attractions()[i].greekname +'</p>');
         infowindow.open(map, place.marker);
     }
 };
@@ -221,22 +217,27 @@ viewModel.search = function(value){
     }
 };
 viewModel.query.subscribe(viewModel.search);
-viewModel.initWiki = function() {
+viewModel.init4SQ = function() {
+    clientID = "SMTDISF1ETBB4LWEVRFQAXE41ZU4BZ3TLKK43S2O1JY2UM5R";
+    clientSecret = "GGHRJ1YFEX0ZIV5XO20NMOFIZFSLIK5D1FAW3OMQ5L3Q1LJU";
+    
     this.attractions().forEach(function(attraction){
-        var req = $.ajax({
-            url: 'http://en.wikipedia.org/w/api.php',
-            data: { action: 'query', list: 'search', srsearch: attraction.name, format: 'json' },
-            dataType: 'jsonp',
-        }).done(function(data){
-            var name = attraction.name.replace(" ", "_");
-            attraction.wikilinks = 'https://en.wikipedia.org/w/api.php?action=opensearch&search=' + name + '&format=json&callback=wikiCallback'
-        }).fail(function(){
-            console.log("ajax request to Wiki API failed!");
-            alert("ajax request to Wiki API failed!");
-        }); 
+        var name = attraction.name.replace(' ', '_');
+        var foursquareURL = 'https://api.foursquare.com/v2/venues/search?ll='+ attraction.lat + ',' + attraction.lng + '&client_id=' + clientID + '&client_secret=' + clientSecret + '&v=20160118' + '&query=' + name;
+        $.getJSON(foursquareURL).done(function(data) {
+            var results = data.response.venues[0];
+            if (results.name == null) {
+                attraction.greekname = "";
+            }
+            else {
+                attraction.greekname = results.name;
+            }
+        }).fail(function() {
+            alert("There was an error with the Foursquare API call. Please refresh the page and try again to load Foursquare data.");
+        });
     });
 };
 
 viewModel.makeHighlights();
-viewModel.initWiki();
+viewModel.init4SQ();
 ko.applyBindings(viewModel);
