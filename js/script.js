@@ -3,8 +3,8 @@ var highlights = [
     {
         "name": "Rotonda", 
         "address": "Egnatia 144, Thessaloniki 546 22, Greece", 
-        "url": "https://inthessaloniki.com/item/rotonda-of-galerius/", 
-        "greekname" : "Rotonda (Ροτόντα)",
+        "url": "https://inthessaloniki.com/item/rotonda-of-galerius/",
+        "date" : 1345,
         "latLng": { 
             "lat": 40.6321,
             "lng": 22.9517,
@@ -14,17 +14,17 @@ var highlights = [
         "name": "White Tower", 
         "address": "Thessaloniki 546 21, Greece", 
         "url": "https://en.wikipedia.org/wiki/White_Tower_of_Thessaloniki", 
-        "greekname" : "White Tower (Λευκός Πύργος)",
+        "date" : 1350,
         "latLng": { 
             "lat": 40.6264,
             "lng": 22.9484,
         }
     }, 
     {
-        "name": "Aristotelous (Aristotle) Square", 
+        "name": "Aristotelous Square", 
         "address": "Thessaloniki 546 24, Greece", 
         "url": "https://en.wikipedia.org/wiki/Aristotelous_Square", 
-        "greekname" : "Aristotelous Square (Πλατεία Αριστοτέλους)",
+        "date" : 1690,
         "latLng": { 
             "lat": 40.6323,
             "lng": 22.9408,
@@ -34,7 +34,7 @@ var highlights = [
         "name": "Ladadika", 
         "address": "Thessaloniki 546 25, Greece", 
         "url": "https://inthessaloniki.com/food/ladadika/", 
-        "greekname" : "Ladadika (Λαδάδικα)",
+        "date" : 1905,
         "latLng": { 
             "lat": 40.6348,
             "lng": 22.9365,
@@ -44,7 +44,7 @@ var highlights = [
         "name": "Bit Bazaar", 
         "address": "Tositsa 7, Thessaloniki 546 31, Greece", 
         "url": "https://inthessaloniki.com/food/bit-bazaar/", 
-        "greekname" : "Bit Bazaar (Μπιτ Μπαζαρ)",
+        "date" : 1856,
         "latLng": { 
             "lat": 40.6389,
             "lng": 22.9443,
@@ -52,6 +52,9 @@ var highlights = [
     },
     // Add more locations here
 ];
+
+clientID = "SMTDISF1ETBB4LWEVRFQAXE41ZU4BZ3TLKK43S2O1JY2UM5R";
+clientSecret = "GGHRJ1YFEX0ZIV5XO20NMOFIZFSLIK5D1FAW3OMQ5L3Q1LJU";
 
 //--- Weather API for Thessaloniki
 var weatherapi = "http://api.wunderground.com/api/8b2bf4a9a6f86794/conditions/q/GR/Thessaloniki.json";
@@ -67,7 +70,6 @@ $.getJSON(weatherapi, function(data) {
 }).error(function(e){
     console.log("Failed to get Weather Underground information. Please check your internet connection.");
     alert("Failed to get Weather Underground information. Please check your internet connection.");
-    //$(".forecast").append('<p style="text-align: center;">Failed to retrieve weather information!</p>');
 }).success(function(){
     viewModel.weather1('Temperature: ' +temperature + '°C');
     viewModel.weather2('<img src="' + iconurl + '">  ' + icon);
@@ -99,6 +101,15 @@ function initMap() {
         viewModel.attractions()[i].marker = marker;
         // Click on markers
         google.maps.event.addListener(marker, 'click', (function(marker, i) {
+            // API call when populating markers
+            var gname = "";
+            var name = highlights[i].name.replace(' ', '_');
+            var foursquareURL = 'https://api.foursquare.com/v2/venues/search?ll='+ highlights[i].latLng.lat + ',' + highlights[i].latLng.lng + '&client_id=' + clientID + '&client_secret=' + clientSecret + '&v=20160118' + '&query=' + name;
+            $.getJSON(foursquareURL, function(res) {
+                gname = res.response.venues[0].name;
+            }).error(function(e){
+                alert("There was an error with the Foursquare API call. Please refresh the page and try again to load Foursquare data.");
+            });
             return function () {    
                 marker.setAnimation(google.maps.Animation.BOUNCE);
                 setTimeout(function () {
@@ -111,7 +122,7 @@ function initMap() {
                                        </b><a href="'+ highlights[i].url + '">' + highlights[i].name + '</a>' + '</p>' + '</div>' 
                                        + '<img src="https://maps.googleapis.com/maps/api/streetview?size=100x100&location='+ highlights[i].latLng.lat + ','+  highlights[i].latLng.lng 
                                        + '&heading=200&pitch=0&key=AIzaSyBGpbBD1bxQdNbNB3ckPFfK1s-prjJH0tM">' + '</div>'
-                                       + '<p>Greek name: ' + viewModel.attractions()[i].greekname + '</p>');
+                                       + '<p>Greek name: ' + gname + '</p>');
                 infowindow.open(map, marker);                                
         }})(marker, i));     
     }
@@ -165,9 +176,9 @@ var Attraction = function(data) {
     this.address = data.address;
     this.url = data.url;
     this.lat = data.latLng.lat;
-    this.lng = data.latLng.lng;
-    this.greekname = data.greekname;
+    this.lng = data.latLng.lng; 
     this.filtered = ko.observable(true);
+    this.date = data.date;
 };
 var viewModel = {
     title: ko.observable("<h2><b>Welcome to Thessaloniki, Greece!</b></h2>"),
@@ -189,7 +200,7 @@ var viewModel = {
                                        + place.url + '">' + place.name + '</a>' + '</p>' + '</div>' 
                                        + '<img src="https://maps.googleapis.com/maps/api/streetview?size=150x150&location='+ place.lat + ',' +  place.lng 
                                        + '&heading=200&pitch=0&key=AIzaSyBGpbBD1bxQdNbNB3ckPFfK1s-prjJH0tM">' + '</div>'
-                                       + '<p>Greek name: ' + viewModel.attractions()[i].greekname +'</p>');
+                                       + '<p>Since: ' + place.date +'</p>');
         infowindow.open(map, place.marker);
     }
 };
@@ -217,27 +228,5 @@ viewModel.search = function(value){
     }
 };
 viewModel.query.subscribe(viewModel.search);
-viewModel.init4SQ = function() {
-    clientID = "SMTDISF1ETBB4LWEVRFQAXE41ZU4BZ3TLKK43S2O1JY2UM5R";
-    clientSecret = "GGHRJ1YFEX0ZIV5XO20NMOFIZFSLIK5D1FAW3OMQ5L3Q1LJU";
-    
-    this.attractions().forEach(function(attraction){
-        var name = attraction.name.replace(' ', '_');
-        var foursquareURL = 'https://api.foursquare.com/v2/venues/search?ll='+ attraction.lat + ',' + attraction.lng + '&client_id=' + clientID + '&client_secret=' + clientSecret + '&v=20160118' + '&query=' + name;
-        $.getJSON(foursquareURL).done(function(data) {
-            var results = data.response.venues[0];
-            if (results.name == null) {
-                attraction.greekname = "";
-            }
-            else {
-                attraction.greekname = results.name;
-            }
-        }).fail(function() {
-            alert("There was an error with the Foursquare API call. Please refresh the page and try again to load Foursquare data.");
-        });
-    });
-};
-
 viewModel.makeHighlights();
-viewModel.init4SQ();
 ko.applyBindings(viewModel);

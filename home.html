@@ -32,7 +32,7 @@
 				<li class="list-element" data-bind="visible: filtered, click: $parent.list"> 
 					<a data-bind="attr: {href: url, title: name}"><span data-bind="text: name"></span></a>
 					<span data-bind="text: address"></span><br>
-					<span data-bind="text: greekname"></span>
+					<span data-bind="html: 'Date: ' + date"></span>
 				</li>
 			</ul>
 			<div class="weather">
