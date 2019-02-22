@@ -105,10 +105,10 @@ function initMap() {
             var gname = "";
             var name = highlights[i].name.replace(' ', '_');
             var foursquareURL = 'https://api.foursquare.com/v2/venues/search?ll='+ highlights[i].latLng.lat + ',' + highlights[i].latLng.lng + '&client_id=' + clientID + '&client_secret=' + clientSecret + '&v=20160118' + '&query=' + name;
-            $.getJSON(foursquareURL, function(res) {
-                gname = res.response.venues[0].name;
-            }).error(function(e){
+            $.getJSON(foursquareURL).error(function(e){
                 alert("There was an error with the Foursquare API call. Please refresh the page and try again to load Foursquare data.");
+            }).done(function(res) {
+                gname = res.response.venues[0].name;
             });
             return function () {    
                 marker.setAnimation(google.maps.Animation.BOUNCE);
@@ -195,13 +195,23 @@ var viewModel = {
         setTimeout(function () {
             place.marker.setAnimation(null);
         }, 2000);
-        infowindow.setContent('<div id="content">' + "<p><b>" + place.name + "</b></p>" + '<div id="bodyContent">'+
+        // API call when populating markers
+        var gname = "";
+        var name = place.name.replace(' ', '_');
+        var foursquareURL = 'https://api.foursquare.com/v2/venues/search?ll='+ place.lat + ',' + place.lng + '&client_id=' + clientID + '&client_secret=' + clientSecret + '&v=20160118' + '&query=' + name;
+        $.getJSON(foursquareURL).error(function(e){
+            alert("There was an error with the Foursquare API call. Please refresh the page and try again to load Foursquare data.");
+        }).done(function(res) {
+            gname = res.response.venues[0].name;
+
+            infowindow.setContent('<div id="content">' + "<p><b>" + place.name + "</b></p>" + '<div id="bodyContent">'+
                                        "<p><b>Address: </b>" + place.address + "</p>" + '<p><b>URL: </b><a href="' 
                                        + place.url + '">' + place.name + '</a>' + '</p>' + '</div>' 
                                        + '<img src="https://maps.googleapis.com/maps/api/streetview?size=150x150&location='+ place.lat + ',' +  place.lng 
                                        + '&heading=200&pitch=0&key=AIzaSyBGpbBD1bxQdNbNB3ckPFfK1s-prjJH0tM">' + '</div>'
-                                       + '<p>Since: ' + place.date +'</p>');
-        infowindow.open(map, place.marker);
+                                       + '<p>Greek name: ' + gname +'</p>');
+            infowindow.open(map, place.marker);
+        });
     }
 };
 viewModel.attractions = ko.observableArray();
